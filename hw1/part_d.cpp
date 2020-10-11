@@ -1,6 +1,6 @@
 #include <iostream>
 #include <unistd.h>
-#include "/usr/local/Aria/include/Aria.h"
+#include "Aria.h"
 
 const int D_T = 50; // ms
 const double MAX_VEL = 350;

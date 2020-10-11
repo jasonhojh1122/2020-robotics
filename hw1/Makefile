@@ -12,5 +12,8 @@ d:
 e: 
 	$(CXX) part_e.cpp $(CFLAGS) $(ARIA_INCLUDE) -o part_e $(ARIA_LINK)
 
+b: 
+	$(CXX) bonus.cpp $(CFLAGS) $(ARIA_INCLUDE) -o bonus $(ARIA_LINK)
+
 clean:
-	rm -f part_c part_d part_e
+	rm -f part_c part_d part_e bonus
