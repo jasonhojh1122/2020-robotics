@@ -231,6 +231,14 @@ public:
 };
 
 int main(int argc, char **argv) {
+	
+	std::cout << "Coordinate System : \n"
+	             "+x: the front of the robot's initial state\n"
+	             "-x: the back  of the robot's initial state\n"
+	             "+Y: the left  of the robot's initial state\n"
+	             "+x: the right of the robot's initial state\n";
+
+	std::cout << "Please input [x] [y] [theta], which are relative to the robot's initial state\n"
 
 	std::cin >> x >> y >> theta;
 	
