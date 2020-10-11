@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unistd.h>
-#include "/usr/local/Aria/include/Aria.h"
+#include "Aria.h"
+// #include "/usr/local/Aria/include/Aria.h"
 
 const int D_T = 50; // ms
 const double MAX_VEL = 350;
@@ -81,7 +82,7 @@ int main(int argc, char **argv) {
 	ArSimpleConnector connector(&argc,argv);
 
 	if (!connector.connectRobot(&robot)){
-		printf("Could not connect to robot... exiting\n");
+		std::cout << "Could not connect to robot... exiting\n";
 		Aria::shutdown();
 		Aria::exit(1);
 	}
@@ -110,7 +111,11 @@ int main(int argc, char **argv) {
 	keyHandler->addKeyHandler('d', &key_d_pressed);
 
 	robot.attachKeyHandler(keyHandler);
-	printf("You may press escape to exit\n");
+	std::cout << "You may press escape to exit\n";
+	std::cout << "You may press w to go forward\n";
+	std::cout << "You may press s to go backward\n";
+	std::cout << "You may press a to go left\n";
+	std::cout << "You may press d to go right\n";
 
 	robot.runAsync(false);
 

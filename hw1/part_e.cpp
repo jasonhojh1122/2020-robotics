@@ -77,6 +77,7 @@ public:
 	bool onCorrectDirection;
 	bool onAngle;
 	bool hasObstacle;
+	bool goal;
 
 	RobotController (ArRobot& robot, double distThreshold, 
 						double targetX, double targetY, double targetTheta)
@@ -88,6 +89,7 @@ public:
 		onCoordniate = false;
 		onCorrectDirection = false;
 		hasObstacle = false;
+		goal = false;
 
 		target.setX(targetX);
 		target.setY(targetY);
@@ -100,11 +102,10 @@ public:
 		}
 	}
 
-	void turnLeft() { rotVel = 10; }
-	void turnRight() { rotVel = -10; }
-	void turnLeftObstacle() {rotVel = 30;}
-	void turnRightObstacle() {rotVel = -30;}
+	void turnLeft() { rotVel = 15; }
+	void turnRight() { rotVel = -15; }
 	void stopTurning() {rotVel = 0;}
+	void moveForwardSlow() {vel = 100;}
 	void moveForward() {vel = 200;}
 	void stopMoving() {vel = 0;}
 	void updateRobotVel() {
@@ -115,14 +116,14 @@ public:
 	}
 
 	double getAngleToTarget() {
-		Vec3 head = Vec3(0, 1, 0);
+		Vec3 head = Vec3(1, 0, 0);
 		Vec3 robotToTarget = Vec3(target.getX() - robot.getX(), target.getY() - robot.getY(), 0);
 		head.rotate(robot.getTh());
 		return head.calcRotation(robotToTarget);
 	}
 
 	bool targetOnLeft() {
-		Vec3 robotFacing = Vec3(0, 1, 0);
+		Vec3 robotFacing = Vec3(1, 0, 0);
 		Vec3 robotToTarget = Vec3(target.getX() - robot.getX(), target.getY() - robot.getY(), 0);
 		
 		robotFacing.rotate(robot.getTh());
@@ -138,7 +139,7 @@ public:
 	void rotateToTarget() {
 		double angleToTarget = getAngleToTarget();
 		
-		if (myABS(angleToTarget) < 1.0) {
+		if (myABS(angleToTarget) < 0.5) {
 			stopTurning();
 			onCorrectDirection = true;
 		}
@@ -153,18 +154,20 @@ public:
 	void avoidObstacle() {
 		
 		range = mySonar->currentReadingPolar(0, 359, &angle);
-		if (range > distThreshold || angle > 20 || angle < -20) {
+
+		if (range > distThreshold || angle > 90 || angle < -90) {
 			hasObstacle = false;
+			stopTurning();
 			return;
 		}
 		
 		hasObstacle = true;
 		onCorrectDirection = false;
-		moveForward();
+		moveForwardSlow();
 		if (angle > 0)
-			turnRightObstacle();
+			turnRight();
 		else
-			turnLeftObstacle();
+			turnLeft();
 	}
 
 	void rotateToTargetAngle() {
@@ -181,25 +184,35 @@ public:
 		}
 	}
 
+	double distToTarget() {
+		double a, b;
+		a = robot.getX() - target.getX();
+		b = robot.getY() - target.getY();
+		return sqrt(a*a + b*b);
+	}
+
 	void checkOnCoordinate() {
-		double dist = robot.getPose().findDistanceTo(target);
+		double dist = distToTarget();
+		std::cout << robot.getX() << ' ' << robot.getY() << ' ' << target.getX() << ' ' << target.getY() << ' ' << dist << '\n';
 		if (dist < ERR_DIST) {
 			onCoordniate = true;
 		}
 	}
 
 	void move() {
+		
 		avoidObstacle();
 		if (hasObstacle) {
-			std::cout << "hasObstacle\n";
 			updateRobotVel();
 			return;
 		}
 
-		if (!onCorrectDirection)
-			rotateToTarget();
-		else
-			moveForward();
+		rotateToTarget();
+		moveForward();
+
+		if (distToTarget() < 800) {
+			vel *= 0.5;
+		}
 
 		if (!onCoordniate) {
 			checkOnCoordinate();
@@ -210,10 +223,9 @@ public:
 		else if (onCoordniate && onAngle) {
 			stopTurning();
 			stopMoving();
-			std::cout << "GOALLLLLLLLL\n";
+			goal = true;
 		}
-		
-		// std::cout << ' ' << rotVel << '\n';
+					
 		updateRobotVel();
 	}
 };
@@ -249,14 +261,14 @@ int main(int argc, char **argv) {
         Aria::setKeyHandler(keyHandler);
     }
 
-	RobotController controller = RobotController(robot, 200, x, y, theta);
+	RobotController controller = RobotController(robot, 800, x, y, theta);
 
 	robot.attachKeyHandler(keyHandler);
 	std::cout << "You may press escape to exit\n";
 
 	robot.runAsync(false);
 
-	while (true) {
+	while (!controller.goal) {
 		controller.move();
 		usleep(D_T);
 	}

@@ -155,6 +155,10 @@ int main(int argc, char **argv) {
 
 	robot.attachKeyHandler(keyHandler);
 	std::cout << "You may press escape to exit\n";
+	std::cout << "You may press w to go forward\n";
+	std::cout << "You may press s to go backward\n";
+	std::cout << "You may press a to go left\n";
+	std::cout << "You may press d to go right\n";
 
 	robot.runAsync(false);
 
@@ -164,7 +168,6 @@ int main(int argc, char **argv) {
 		robot.setRotVel(0);
 		robot.unlock();
 		if (controller.shouldStop()) {
-			std::cout << "should stop\n";
 			controller.vel *= 0.95;
 			keyPressCallBack.updateRobotVel();
 		}
